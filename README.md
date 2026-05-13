@@ -1,8 +1,19 @@
+<div align="center">
+
 # applyr
 
-Automated job application workflow powered by AI.
+**Automated job application workflow powered by AI.**
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/)
+[![Docker](https://img.shields.io/badge/docker-ready-2496ED.svg)](https://www.docker.com/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 Scrapes jobs from LinkedIn and Gupy, scores each one against your resume, generates a tailored cover letter, and applies automatically — all inside a Docker container.
+
+[Getting Started](#setup) · [Configuration](#configuration) · [Contributing](#contributing) · [Roadmap](#roadmap)
+
+</div>
 
 ---
 
@@ -224,6 +235,38 @@ applyr/
 
 ---
 
+## Roadmap
+
+- [ ] Greenhouse / Lever / Workday portal support
+- [ ] Web dashboard to visualize application history
+- [ ] Resume auto-tailoring per job (keyword injection)
+- [ ] Email follow-up scheduling
+- [ ] Multi-language support for non-English job boards
+- [ ] Indeed scraper + auto-apply
+
+---
+
+## Contributing
+
+Contributions are very welcome! Here's how to get started:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/new-platform`)
+3. Commit your changes (`git commit -m 'feat: add Indeed scraper'`)
+4. Push to your branch (`git push origin feature/new-platform`)
+5. Open a Pull Request
+
+**Ideas for contribution:**
+- Add scrapers for new platforms (Indeed, Glassdoor, Workday, Lever, Greenhouse)
+- Improve the AI matching prompt
+- Add tests
+- Improve bot detection resistance
+- Build a CLI interface
+
+Please open an [issue](https://github.com/pedrohrod/applyr/issues) first for major changes so we can discuss the approach.
+
+---
+
 ## Disclaimer
 
 This project automates actions on third-party platforms. Use responsibly:
@@ -236,4 +279,4 @@ This project automates actions on third-party platforms. Use responsibly:
 
 ## License
 
-MIT
+[MIT](LICENSE) © 2026 Pedro Henrique
