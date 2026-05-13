@@ -251,13 +251,29 @@ applyr/
 
 ## 🗺️ Roadmap
 
+### ✅ Done
+- [x] 🔍 LinkedIn Easy Apply scraper + auto-apply
+- [x] 🔍 Gupy scraper + auto-apply
+- [x] 🤖 AI-powered match scoring (0–100)
+- [x] ✍️ Per-job cover letter generation
+- [x] 💬 Screening question auto-answering
+- [x] 🚫 Blacklists (company, title, location) + `apply_once_at_company`
+- [x] 🔌 Multi-provider AI (Anthropic, OpenAI, Gemini, Ollama)
+- [x] 📊 SQLite + CSV tracking
+- [x] 🐳 Docker-ready setup
+- [x] 🛡️ Config & env validation — fails fast with clear error messages
+- [x] 🔁 Shared browser session — login once, reuse across all applications
+- [x] ⚡ Retry logic — 3 attempts with exponential backoff on network failures
+- [x] 🤖 CAPTCHA detection — pauses and retries before aborting
+- [x] 🧪 Test suite — 48 tests covering all core modules
+
+### 🔜 Coming up
+- [ ] 🧬 Resume auto-tailoring per job (keyword injection for ATS)
+- [ ] 🔔 Notifications (Telegram / email) when applications are sent
 - [ ] 🌐 Greenhouse / Lever / Workday portal support
-- [ ] 📈 Web dashboard to visualize application history
-- [ ] 🧬 Resume auto-tailoring per job (keyword injection)
-- [ ] 📧 Email follow-up scheduling
-- [ ] 🌍 Multi-language support for non-English job boards
 - [ ] 🔍 Indeed scraper + auto-apply
-- [ ] 🧪 Test suite
+- [ ] 📈 Web dashboard to visualize application history
+- [ ] 🌍 Multi-language support for non-English job boards
 
 ---
 
