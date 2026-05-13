@@ -265,15 +265,15 @@ applyr/
 - [x] 🔁 Shared browser session — login once, reuse across all applications
 - [x] ⚡ Retry logic — 3 attempts with exponential backoff on network failures
 - [x] 🤖 CAPTCHA detection — pauses and retries before aborting
-- [x] 🧪 Test suite — 48 tests covering all core modules
+- [x] 🧪 Test suite — 67 tests covering all core modules
+- [x] 🔔 Notifications — Telegram and email alerts on every application
+- [x] 📈 Web dashboard — Chart.js UI with stats, timeline, score distribution, and application table
+- [x] 🌍 Multi-language support — EN / PT / ES / DE / FR with auto-detection from job text
 
 ### 🔜 Coming up
 - [ ] 🧬 Resume auto-tailoring per job (keyword injection for ATS)
-- [ ] 🔔 Notifications (Telegram / email) when applications are sent
 - [ ] 🌐 Greenhouse / Lever / Workday portal support
 - [ ] 🔍 Indeed scraper + auto-apply
-- [ ] 📈 Web dashboard to visualize application history
-- [ ] 🌍 Multi-language support for non-English job boards
 
 ---
 
