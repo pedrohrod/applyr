@@ -1,3 +1,4 @@
+from __future__ import annotations
 import pdfplumber
 from pathlib import Path
 from loguru import logger

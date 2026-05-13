@@ -1,3 +1,4 @@
+from __future__ import annotations
 import json
 from loguru import logger
 from src.ai.llm_provider import LLMProvider
