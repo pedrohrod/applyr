@@ -1,6 +1,5 @@
 import asyncio
 import aiohttp
-from dataclasses import dataclass, field
 from loguru import logger
 from src.scrapers.linkedin import Job
 
@@ -22,7 +21,7 @@ class GupyScraper:
             if j.id not in seen:
                 seen.add(j.id)
                 unique.append(j)
-        logger.info(f"Gupy: {len(unique)} vagas únicas encontradas")
+        logger.info(f"Gupy: {len(unique)} unique jobs found")
         return unique
 
     async def _search(self, session: aiohttp.ClientSession, keyword: str, limit: int) -> list[Job]:
@@ -55,7 +54,7 @@ class GupyScraper:
                     offset += per_page
                     await asyncio.sleep(1)
             except Exception as e:
-                logger.error(f"Erro na API Gupy ({keyword}): {e}")
+                logger.error(f"Gupy API error (keyword={keyword}): {e}")
                 break
         return jobs
 
@@ -87,5 +86,5 @@ class GupyScraper:
                 easy_apply=True,
             )
         except Exception as e:
-            logger.debug(f"Erro ao parsear job Gupy: {e}")
+            logger.debug(f"Failed to parse Gupy job: {e}")
             return None

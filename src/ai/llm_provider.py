@@ -1,10 +1,10 @@
 """
-Camada de abstração para provedores de LLM.
+LLM provider abstraction layer.
 
-Configure via variáveis de ambiente:
+Configure via environment variables:
   LLM_PROVIDER = anthropic | openai | gemini | ollama
-  LLM_MODEL    = nome do modelo (usa padrão do provider se omitido)
-  LLM_API_URL  = base URL (obrigatório apenas para ollama)
+  LLM_MODEL    = model name (uses provider default if omitted)
+  LLM_API_URL  = base URL (required only for ollama)
 
   ANTHROPIC_API_KEY = sk-ant-...
   OPENAI_API_KEY    = sk-...
@@ -83,7 +83,7 @@ class GeminiProvider:
 
 
 # ---------------------------------------------------------------------------
-# Ollama  (API compatível com OpenAI — self-hosted)
+# Ollama (OpenAI-compatible API — self-hosted)
 # ---------------------------------------------------------------------------
 class OllamaProvider:
     DEFAULT_MODEL = "llama3"
@@ -110,7 +110,7 @@ def create_provider() -> LLMProvider:
     model = os.environ.get("LLM_MODEL", "")
     api_url = os.environ.get("LLM_API_URL", "http://localhost:11434")
 
-    logger.info(f"LLM provider: {name} | modelo: {model or 'padrão'}")
+    logger.info(f"LLM provider: {name} | model: {model or 'default'}")
 
     if name == "anthropic":
         return AnthropicProvider(os.environ["ANTHROPIC_API_KEY"], model)
@@ -122,5 +122,5 @@ def create_provider() -> LLMProvider:
         return OllamaProvider(api_url, model)
 
     raise ValueError(
-        f"LLM_PROVIDER '{name}' inválido. Use: anthropic | openai | gemini | ollama"
+        f"Unknown LLM_PROVIDER '{name}'. Valid options: anthropic | openai | gemini | ollama"
     )

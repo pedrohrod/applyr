@@ -17,7 +17,7 @@ def setup_logging(settings: dict) -> None:
     log_cfg = settings.get("logging", {})
     logger.remove()
     logger.add(sys.stderr, level=log_cfg.get("level", "INFO"))
-    log_file = log_cfg.get("file", "logs/apply-job.log")
+    log_file = log_cfg.get("file", "logs/applyr.log")
     Path(log_file).parent.mkdir(parents=True, exist_ok=True)
     logger.add(log_file, rotation="10 MB", retention="7 days", level="DEBUG")
 
@@ -29,7 +29,7 @@ async def main() -> None:
 
     resume_path = Path("resume/resume.pdf")
     if not resume_path.exists():
-        logger.error("Currículo não encontrado em resume/resume.pdf — coloque seu PDF lá e tente novamente.")
+        logger.error("Resume not found at resume/resume.pdf — place your PDF there and try again.")
         sys.exit(1)
 
     from src.orchestrator import Orchestrator

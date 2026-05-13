@@ -1,7 +1,7 @@
 import csv
 from datetime import datetime
 from pathlib import Path
-from sqlalchemy import create_engine, Column, String, Integer, DateTime, Text, Boolean
+from sqlalchemy import create_engine, Column, String, Integer, DateTime, Text
 from sqlalchemy.orm import DeclarativeBase, Session
 from loguru import logger
 
@@ -21,7 +21,7 @@ class Application(Base):
     platform = Column(String(64))
     url = Column(Text)
     match_score = Column(Integer, default=0)
-    status = Column(String(64), default="pending")   # pending | applied | failed | skipped
+    status = Column(String(64), default="pending")  # pending | applied | failed | skipped
     applied_at = Column(DateTime, nullable=True)
     cover_letter = Column(Text, nullable=True)
     notes = Column(Text, nullable=True)
@@ -75,7 +75,7 @@ class Tracker:
         with open(path, "a", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             if write_header:
-                writer.writerow(["data", "empresa", "cargo", "plataforma", "score", "url", "cover_letter"])
+                writer.writerow(["date", "company", "title", "platform", "score", "url", "cover_letter"])
             writer.writerow([
                 datetime.utcnow().strftime("%Y-%m-%d %H:%M"),
                 job.company,

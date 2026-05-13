@@ -1,21 +1,21 @@
-# apply-job
+# applyr
 
-Workflow automatizado para aplicação em vagas de emprego com matching por IA.
+Automated job application workflow powered by AI.
 
-Busca vagas no LinkedIn e Gupy, calcula um score de compatibilidade com seu currículo, gera cover letters personalizadas e aplica automaticamente — tudo dentro de um container Docker.
+Scrapes jobs from LinkedIn and Gupy, scores each one against your resume, generates a tailored cover letter, and applies automatically — all inside a Docker container.
 
 ---
 
-## Como funciona
+## How it works
 
 ```
 Scrapers (LinkedIn · Gupy)
         ↓
-  Filtros (blacklist, nível, tipo, data)
+  Filters (blacklist, level, type, date)
         ↓
-  Match IA (score 0–100)
+  AI Match score (0–100)
         ↓  score ≥ threshold
-  Cover letter personalizada
+  Tailored cover letter
         ↓
   Auto-apply (Playwright)
         ↓
@@ -24,57 +24,57 @@ Scrapers (LinkedIn · Gupy)
 
 ---
 
-## Pré-requisitos
+## Requirements
 
-- [Docker](https://docs.docker.com/get-docker/) e Docker Compose
-- Conta no LinkedIn e/ou Gupy
-- API key de um dos providers de IA suportados
+- [Docker](https://docs.docker.com/get-docker/) and Docker Compose
+- LinkedIn and/or Gupy account
+- API key for one of the supported AI providers
 
 ---
 
-## Instalação
+## Setup
 
 ```bash
-git clone https://github.com/seu-usuario/apply-job.git
-cd apply-job
+git clone https://github.com/pedrohrod/applyr.git
+cd applyr
 
 cp .env.example .env
 ```
 
 ---
 
-## Configuração
+## Configuration
 
-### 1. Variáveis de ambiente (`.env`)
+### 1. Environment variables (`.env`)
 
 ```env
-# Provider de IA: anthropic | openai | gemini | ollama
+# AI provider: anthropic | openai | gemini | ollama
 LLM_PROVIDER=anthropic
-LLM_MODEL=                        # deixe vazio para usar o padrão do provider
-LLM_API_URL=http://localhost:11434  # apenas para ollama
+LLM_MODEL=                          # leave empty to use the provider default
+LLM_API_URL=http://localhost:11434  # only required for ollama
 
 ANTHROPIC_API_KEY=sk-ant-...
 OPENAI_API_KEY=sk-...
 GEMINI_API_KEY=...
 
-LINKEDIN_EMAIL=seu@email.com
-LINKEDIN_PASSWORD=suasenha
-GUPY_EMAIL=seu@email.com
-GUPY_PASSWORD=suasenha
+LINKEDIN_EMAIL=you@email.com
+LINKEDIN_PASSWORD=yourpassword
+GUPY_EMAIL=you@email.com
+GUPY_PASSWORD=yourpassword
 ```
 
-### 2. Providers de IA suportados
+### 2. Supported AI providers
 
-| Provider | Modelo padrão | Variável necessária |
+| Provider | Default model | Required variable |
 |---|---|---|
 | `anthropic` | `claude-haiku-4-5-20251001` | `ANTHROPIC_API_KEY` |
 | `openai` | `gpt-4o-mini` | `OPENAI_API_KEY` |
 | `gemini` | `gemini-1.5-flash` | `GEMINI_API_KEY` |
-| `ollama` | `llama3` | `LLM_API_URL` (sem key) |
+| `ollama` | `llama3` | `LLM_API_URL` (no key needed) |
 
-Para trocar de provider, basta alterar `LLM_PROVIDER` no `.env` — sem mexer em código.
+Switch providers by changing `LLM_PROVIDER` in `.env` — no code changes required.
 
-### 3. Preferências de busca (`config/settings.yaml`)
+### 3. Job search preferences (`config/settings.yaml`)
 
 ```yaml
 job_search:
@@ -82,7 +82,7 @@ job_search:
     - "Software Engineer"
     - "Backend Developer"
   locations:
-    - "Brasil"
+    - "Brazil"
   remote: true
   hybrid: true
   onsite: false
@@ -99,65 +99,65 @@ job_search:
 
 filters:
   company_blacklist:
-    - "Stefanini"
+    - "Acme Corp"
   title_blacklist:
-    - "Diretor"
+    - "Director"
   apply_once_at_company: true
 
 matching:
-  threshold: 70           # score mínimo (0–100) para aplicar
+  threshold: 70           # minimum score (0–100) to apply
 
 application:
   max_per_session: 50
   attach_cover_letter: true
 ```
 
-### 4. Perfil do candidato (`config/profile.yaml`)
+### 4. Candidate profile (`config/profile.yaml`)
 
-Preencha com seus dados reais. Esse arquivo é usado para:
-- calcular o match com as vagas
-- gerar cover letters personalizadas
-- responder perguntas de triagem nos formulários automaticamente
+Fill in your real data. This file drives:
+- AI match scoring against job descriptions
+- Personalized cover letter generation
+- Automatic answers to screening questions in application forms
 
-Campos importantes:
+Key fields:
 
 ```yaml
 personal:
-  name: "Seu Nome"
-  email: "seu@email.com"
+  name: "Your Name"
+  email: "you@email.com"
 
 salary_expectations:
-  range: "R$ 8.000 - R$ 12.000"
+  range: "USD 80,000 - 120,000"
 
 availability:
-  notice_period: "Imediato"
+  notice_period: "Immediately"
 
 legal_authorization:
-  brazil_work_authorization: "Sim"
+  us_work_authorization: "Yes"
 
 work_preferences:
-  remote_work: "Sim"
-  open_to_relocation: "Sim"
-  willing_to_undergo_background_checks: "Sim"
+  remote_work: "Yes"
+  open_to_relocation: "Yes"
+  willing_to_undergo_background_checks: "Yes"
 ```
 
-### 5. Currículo
+### 5. Resume
 
-Coloque seu currículo em PDF na pasta `resume/`:
+Place your resume PDF in the `resume/` folder:
 
 ```bash
-cp /caminho/para/seu/curriculo.pdf resume/resume.pdf
+cp /path/to/your/resume.pdf resume/resume.pdf
 ```
 
 ---
 
-## Rodando
+## Running
 
 ```bash
 docker compose up --build
 ```
 
-Para rodar em background:
+Run in the background:
 
 ```bash
 docker compose up --build -d
@@ -166,57 +166,57 @@ docker compose logs -f
 
 ---
 
-## Resultados
+## Output
 
-Após cada execução, os dados ficam em `data/`:
+After each run, results are saved in `data/`:
 
-| Arquivo | Conteúdo |
+| File | Contents |
 |---|---|
-| `data/applications.db` | Banco SQLite com histórico completo |
-| `data/applications.csv` | Planilha exportável com todas as candidaturas |
-| `logs/apply-job.log` | Log detalhado da execução |
+| `data/applications.db` | SQLite database with full application history |
+| `data/applications.csv` | Exportable spreadsheet of all applications |
+| `logs/applyr.log` | Detailed execution log |
 
-Colunas do CSV: `data`, `empresa`, `cargo`, `plataforma`, `score`, `url`, `cover_letter`
+CSV columns: `date`, `company`, `title`, `platform`, `score`, `url`, `cover_letter`
 
 ---
 
-## Plataformas suportadas
+## Supported platforms
 
-| Plataforma | Scraping | Auto-apply |
+| Platform | Scraping | Auto-apply |
 |---|---|---|
 | LinkedIn Easy Apply | ✅ | ✅ |
 | Gupy | ✅ | ✅ |
-| Portais de empresas (Greenhouse, Lever) | 🔜 | 🔜 |
+| Company portals (Greenhouse, Lever) | 🔜 | 🔜 |
 
 ---
 
-## Estrutura do projeto
+## Project structure
 
 ```
-apply-job/
+applyr/
 ├── config/
-│   ├── settings.yaml       # filtros de busca, threshold, limites
-│   └── profile.yaml        # seus dados pessoais e profissionais
+│   ├── settings.yaml       # search filters, threshold, limits
+│   └── profile.yaml        # your personal and professional data
 ├── resume/
-│   └── resume.pdf          # seu currículo (adicione aqui)
+│   └── resume.pdf          # your resume (add here)
 ├── src/
 │   ├── ai/
-│   │   ├── llm_provider.py     # abstração de providers (Anthropic, OpenAI, Gemini, Ollama)
-│   │   ├── matcher.py          # scoring de match currículo ↔ vaga
-│   │   ├── cover_letter.py     # geração de cover letter por vaga
-│   │   ├── question_answerer.py # responde perguntas de triagem
-│   │   └── resume_parser.py    # extração de texto do PDF
+│   │   ├── llm_provider.py     # provider abstraction (Anthropic, OpenAI, Gemini, Ollama)
+│   │   ├── matcher.py          # resume ↔ job match scoring
+│   │   ├── cover_letter.py     # per-job cover letter generation
+│   │   ├── question_answerer.py # screening question answering
+│   │   └── resume_parser.py    # PDF text extraction
 │   ├── scrapers/
-│   │   ├── linkedin.py         # scraper do LinkedIn
-│   │   └── gupy.py             # scraper da Gupy
+│   │   ├── linkedin.py         # LinkedIn scraper
+│   │   └── gupy.py             # Gupy scraper
 │   ├── applicator/
-│   │   ├── linkedin.py         # bot de aplicação LinkedIn Easy Apply
-│   │   └── gupy.py             # bot de aplicação Gupy
+│   │   ├── linkedin.py         # LinkedIn Easy Apply bot
+│   │   └── gupy.py             # Gupy application bot
 │   ├── tracker/
-│   │   └── db.py               # tracking em SQLite + CSV
-│   └── orchestrator.py         # orquestra todo o fluxo
-├── data/                   # gerado automaticamente
-├── logs/                   # gerado automaticamente
+│   │   └── db.py               # SQLite + CSV tracking
+│   └── orchestrator.py         # main workflow orchestrator
+├── data/                   # auto-generated
+├── logs/                   # auto-generated
 ├── Dockerfile
 ├── docker-compose.yml
 └── main.py
@@ -224,16 +224,16 @@ apply-job/
 
 ---
 
-## Aviso
+## Disclaimer
 
-Este projeto automatiza ações em plataformas de terceiros. Use com responsabilidade:
+This project automates actions on third-party platforms. Use responsibly:
 
-- Respeite os limites diários configurados em `settings.yaml`
-- Revise o `profile.yaml` antes de rodar — as respostas automáticas são baseadas nesses dados
-- Algumas plataformas podem detectar e bloquear automações em caso de uso excessivo
+- Respect the daily limits configured in `settings.yaml`
+- Review `profile.yaml` carefully before running — automatic answers are based on that data
+- Excessive automation may trigger bot detection and account restrictions
 
 ---
 
-## Licença
+## License
 
 MIT

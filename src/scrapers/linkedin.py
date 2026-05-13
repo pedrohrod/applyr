@@ -29,7 +29,7 @@ class LinkedInScraper:
     async def scrape_jobs(
         self,
         keywords: list[str],
-        location: str = "Brasil",
+        location: str = "Brazil",
         max_jobs: int = 50,
         experience_levels: list[str] | None = None,
     ) -> list[Job]:
@@ -51,7 +51,7 @@ class LinkedInScraper:
                     found = await self._search_keyword(page, keyword, location, max_jobs - len(jobs))
                     jobs.extend(found)
             except Exception as e:
-                logger.error(f"Erro no scraping do LinkedIn: {e}")
+                logger.error(f"LinkedIn scraping error: {e}")
             finally:
                 await browser.close()
         seen = set()
@@ -60,17 +60,17 @@ class LinkedInScraper:
             if j.id not in seen:
                 seen.add(j.id)
                 unique.append(j)
-        logger.info(f"LinkedIn: {len(unique)} vagas únicas encontradas")
+        logger.info(f"LinkedIn: {len(unique)} unique jobs found")
         return unique
 
     async def _login(self, page: Page) -> None:
-        logger.info("Fazendo login no LinkedIn...")
+        logger.info("Logging in to LinkedIn...")
         await page.goto(f"{self.BASE}/login", wait_until="networkidle")
         await page.fill("#username", self.email)
         await page.fill("#password", self.password)
         await page.click('[type="submit"]')
         await page.wait_for_url("**/feed**", timeout=15000)
-        logger.info("Login no LinkedIn realizado com sucesso")
+        logger.info("LinkedIn login successful")
 
     async def _search_keyword(self, page: Page, keyword: str, location: str, limit: int) -> list[Job]:
         jobs: list[Job] = []
@@ -93,7 +93,6 @@ class LinkedInScraper:
                 job = await self._extract_card(page, card)
                 if job:
                     jobs.append(job)
-            # próxima página
             next_btn = await page.query_selector('button[aria-label="Next"]')
             if not next_btn:
                 break
@@ -129,7 +128,7 @@ class LinkedInScraper:
                 easy_apply=easy_apply,
             )
         except Exception as e:
-            logger.debug(f"Erro ao extrair card: {e}")
+            logger.debug(f"Failed to extract job card: {e}")
             return None
 
     async def _text(self, page: Page, selector: str) -> str:

@@ -4,7 +4,7 @@ from src.ai.llm_provider import LLMProvider
 
 
 class QuestionAnswerer:
-    """Responde perguntas de triagem de formulários de candidatura."""
+    """Answers screening questions found in job application forms."""
 
     def __init__(self, provider: LLMProvider, profile: dict):
         self.provider = provider
@@ -13,24 +13,24 @@ class QuestionAnswerer:
     def answer(self, question: str, options: list[str] | None = None) -> str:
         options_text = ""
         if options:
-            options_text = f"\nOpções disponíveis: {json.dumps(options, ensure_ascii=False)}"
-            options_text += "\nRetorne EXATAMENTE uma das opções acima (texto idêntico)."
+            options_text = f"\nAvailable options: {json.dumps(options)}"
+            options_text += "\nReturn EXACTLY one of the options above (identical text)."
 
-        prompt = f"""Você é o candidato abaixo respondendo uma pergunta de triagem de emprego.
+        prompt = f"""You are the candidate below answering a job application screening question.
 
-## PERFIL DO CANDIDATO
+## CANDIDATE PROFILE
 {json.dumps(self.profile, ensure_ascii=False, indent=2)}
 
-## PERGUNTA
+## QUESTION
 {question}{options_text}
 
-## INSTRUÇÃO
-Retorne APENAS a resposta, sem explicações, sem pontuação extra.
-Se for pergunta de múltipla escolha, retorne exatamente uma das opções.
-Se for texto livre, seja conciso (máximo 2 frases).
+## INSTRUCTIONS
+Return ONLY the answer, no explanations, no extra punctuation.
+If it is a multiple-choice question, return exactly one of the options.
+If it is free text, be concise (maximum 2 sentences).
 """
         try:
             return self.provider.complete(prompt, max_tokens=200)
         except Exception as e:
-            logger.error(f"Erro ao responder pergunta '{question}': {e}")
-            return options[0] if options else "Sim"
+            logger.error(f"Failed to answer question '{question}': {e}")
+            return options[0] if options else "Yes"

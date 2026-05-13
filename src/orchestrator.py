@@ -57,38 +57,29 @@ class Orchestrator:
         f = settings.get("filters", {})
         self.company_blacklist = [c.lower() for c in f.get("company_blacklist", [])]
         self.title_blacklist = [t.lower() for t in f.get("title_blacklist", [])]
-        self.location_blacklist = [l.lower() for l in f.get("location_blacklist", [])]
+        self.location_blacklist = [loc.lower() for loc in f.get("location_blacklist", [])]
         self.apply_once_at_company = f.get("apply_once_at_company", True)
 
-    # ------------------------------------------------------------------
-    # Filtros
-    # ------------------------------------------------------------------
     def _is_blacklisted(self, job: Job) -> tuple[bool, str]:
-        company_lower = job.company.lower()
         for term in self.company_blacklist:
-            if term in company_lower:
-                return True, f"empresa na blacklist: '{term}'"
+            if term in job.company.lower():
+                return True, f"company blacklisted: '{term}'"
 
-        title_lower = job.title.lower()
         for term in self.title_blacklist:
-            if term in title_lower:
-                return True, f"título na blacklist: '{term}'"
+            if term in job.title.lower():
+                return True, f"title blacklisted: '{term}'"
 
-        location_lower = job.location.lower()
         for term in self.location_blacklist:
-            if term in location_lower:
-                return True, f"localização na blacklist: '{term}'"
+            if term in job.location.lower():
+                return True, f"location blacklisted: '{term}'"
 
         return False, ""
 
-    # ------------------------------------------------------------------
-    # Main
-    # ------------------------------------------------------------------
     async def run(self) -> None:
-        logger.info("=== Iniciando workflow de aplicação de vagas ===")
+        logger.info("=== Starting applyr workflow ===")
         js = self.settings["job_search"]
         keywords = js["keywords"]
-        locations = js.get("locations", ["Brasil"])
+        locations = js.get("locations", ["Brazil"])
         platforms = self.settings["platforms"]
 
         jobs: list[Job] = []
@@ -103,7 +94,7 @@ class Orchestrator:
             gupy_jobs = await self.gupy_scraper.scrape_jobs(keywords, self.max_jobs)
             jobs.extend(gupy_jobs)
 
-        logger.info(f"Total de vagas coletadas: {len(jobs)}")
+        logger.info(f"Total jobs collected: {len(jobs)}")
 
         ln_limit = platforms.get("linkedin", {}).get("daily_limit", 40)
         gupy_limit = platforms.get("gupy", {}).get("daily_limit", 30)
@@ -113,34 +104,29 @@ class Orchestrator:
 
         for job in jobs:
             if total_applied >= self.max_per_session:
-                logger.info(f"Limite de {self.max_per_session} aplicações por sessão atingido.")
+                logger.info(f"Session limit of {self.max_per_session} applications reached.")
                 break
 
-            # já aplicou antes?
             if self.tracker.already_applied(job.id):
-                logger.debug(f"Já aplicado: {job.title} @ {job.company}")
+                logger.debug(f"Already applied: {job.title} @ {job.company}")
                 continue
 
-            # limite diário por plataforma
             limit = ln_limit if job.platform == "linkedin" else gupy_limit
             if daily_counts.get(job.platform, 0) >= limit:
-                logger.debug(f"Limite diário atingido para {job.platform}")
+                logger.debug(f"Daily limit reached for {job.platform}")
                 continue
 
-            # apply_once_at_company
             if self.apply_once_at_company and job.company.lower() in companies_this_session:
-                logger.debug(f"Já aplicou na {job.company} nessa sessão — pulando")
+                logger.debug(f"Already applied to {job.company} this session — skipping")
                 self.tracker.record(job, 0, "skipped", notes="apply_once_at_company")
                 continue
 
-            # blacklists
             blocked, reason = self._is_blacklisted(job)
             if blocked:
-                logger.debug(f"Bloqueado ({reason}): {job.title} @ {job.company}")
+                logger.debug(f"Blocked ({reason}): {job.title} @ {job.company}")
                 self.tracker.record(job, 0, "skipped", notes=reason)
                 continue
 
-            # scoring com IA
             match = self.matcher.score(self.resume_text, {
                 "title": job.title,
                 "company": job.company,
@@ -155,7 +141,6 @@ class Orchestrator:
                 self.tracker.record(job, match.score, "skipped", notes=match.recommendation)
                 continue
 
-            # cover letter
             cover_letter = ""
             if self.attach_cover_letter:
                 cover_letter = self.cover_gen.generate(
@@ -164,7 +149,6 @@ class Orchestrator:
                     self.profile,
                 )
 
-            # aplicar
             success = False
             if job.platform == "linkedin":
                 success = await self.linkedin_applicator.apply(job, cover_letter)
@@ -179,7 +163,6 @@ class Orchestrator:
                 daily_counts[job.platform] = daily_counts.get(job.platform, 0) + 1
                 companies_this_session.add(job.company.lower())
 
-            # delay anti-bot
             delay = self.delay
             if self.randomize:
                 delay = random.uniform(delay * 0.5, delay * 1.5)
@@ -187,7 +170,7 @@ class Orchestrator:
 
         stats = self.tracker.stats()
         logger.info(
-            f"=== Sessão concluída === "
-            f"Aplicados: {stats['applied']} | Pulados: {stats['skipped']} | "
-            f"Falhas: {stats['failed']} | Total histórico: {stats['total']}"
+            f"=== Session complete === "
+            f"Applied: {stats['applied']} | Skipped: {stats['skipped']} | "
+            f"Failed: {stats['failed']} | Total history: {stats['total']}"
         )

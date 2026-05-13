@@ -17,31 +17,31 @@ class JobMatcher:
         self.provider = provider
 
     def score(self, resume_text: str, job: dict) -> MatchResult:
-        prompt = f"""Você é um especialista em recrutamento tech. Analise o match entre o currículo e a vaga abaixo.
+        prompt = f"""You are an expert tech recruiter. Analyze the match between the resume and the job posting below.
 
-## CURRÍCULO
+## RESUME
 {resume_text}
 
-## VAGA
-Título: {job.get('title', '')}
-Empresa: {job.get('company', '')}
-Descrição: {job.get('description', '')}
-Requisitos: {job.get('requirements', '')}
+## JOB POSTING
+Title: {job.get('title', '')}
+Company: {job.get('company', '')}
+Description: {job.get('description', '')}
+Requirements: {job.get('requirements', '')}
 
-## INSTRUÇÃO
-Retorne APENAS um JSON válido com esta estrutura:
+## INSTRUCTIONS
+Return ONLY a valid JSON with this structure:
 {{
-  "score": <inteiro de 0 a 100>,
-  "strong_matches": ["habilidade ou experiência que bate com a vaga"],
-  "missing_skills": ["o que está faltando no currículo"],
-  "recommendation": "frase curta explicando o score"
+  "score": <integer from 0 to 100>,
+  "strong_matches": ["skills or experience that align with the job"],
+  "missing_skills": ["skills missing from the resume"],
+  "recommendation": "short sentence explaining the score"
 }}
 
-Critérios de score:
-- 90-100: Encaixe perfeito, candidato ideal
-- 70-89: Bom encaixe, vale aplicar
-- 50-69: Encaixe parcial, pode tentar
-- 0-49: Encaixe fraco, não recomendado
+Score criteria:
+- 90-100: Perfect fit, ideal candidate
+- 70-89: Good fit, worth applying
+- 50-69: Partial fit, could try
+- 0-49: Weak fit, not recommended
 """
         try:
             raw = self.provider.complete(prompt, max_tokens=512)
@@ -57,5 +57,5 @@ Critérios de score:
                 recommendation=data.get("recommendation", ""),
             )
         except Exception as e:
-            logger.error(f"Erro ao calcular match: {e}")
-            return MatchResult(score=0, recommendation=f"Erro: {e}")
+            logger.error(f"Failed to compute match score: {e}")
+            return MatchResult(score=0, recommendation=f"Error: {e}")

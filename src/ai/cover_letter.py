@@ -7,38 +7,38 @@ class CoverLetterGenerator:
         self.provider = provider
 
     def generate(self, resume_text: str, job: dict, profile: dict) -> str:
-        name = profile.get("personal", {}).get("name", "Candidato")
+        name = profile.get("personal", {}).get("name", "Candidate")
         salary = profile.get("salary_expectations", {}).get("range", "")
-        salary_line = f"Pretensão salarial: {salary}" if salary else ""
+        salary_line = f"Salary expectation: {salary}" if salary else ""
 
-        prompt = f"""Você é um especialista em carreira. Escreva uma carta de apresentação profissional e personalizada.
+        prompt = f"""You are a career expert. Write a professional and personalized cover letter.
 
-## SOBRE O CANDIDATO
-Nome: {name}
+## ABOUT THE CANDIDATE
+Name: {name}
 {salary_line}
 {resume_text[:2000]}
 
-## VAGA
-Título: {job.get('title', '')}
-Empresa: {job.get('company', '')}
-Descrição: {job.get('description', '')[:1500]}
+## JOB POSTING
+Title: {job.get('title', '')}
+Company: {job.get('company', '')}
+Description: {job.get('description', '')[:1500]}
 
-## REGRAS
-- Máximo 3 parágrafos curtos
-- Tom profissional mas humano, não genérico
-- Mencione especificamente a empresa e o cargo
-- Destaque 2-3 habilidades do currículo que se encaixam na vaga
-- Escreva em {self._detect_language(job)}
-- Não inclua cabeçalho nem assinatura formal, apenas o corpo da carta
+## RULES
+- Maximum 3 short paragraphs
+- Professional but human tone, not generic
+- Mention the company and role specifically
+- Highlight 2-3 skills from the resume that match the job
+- Write in {self._detect_language(job)}
+- No header or formal closing, just the body of the letter
 """
         try:
             return self.provider.complete(prompt, max_tokens=600)
         except Exception as e:
-            logger.error(f"Erro ao gerar cover letter: {e}")
+            logger.error(f"Failed to generate cover letter: {e}")
             return ""
 
     def _detect_language(self, job: dict) -> str:
         text = f"{job.get('title', '')} {job.get('description', '')}".lower()
-        english_words = ["engineer", "developer", "software", "backend", "frontend", "experience"]
-        en_count = sum(1 for w in english_words if w in text)
-        return "inglês" if en_count >= 3 else "português"
+        portuguese_words = ["desenvolvedor", "engenheiro", "empresa", "vaga", "requisitos", "experiência"]
+        pt_count = sum(1 for w in portuguese_words if w in text)
+        return "Portuguese" if pt_count >= 2 else "English"

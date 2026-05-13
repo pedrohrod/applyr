@@ -1,25 +1,25 @@
 # ============================================================
-#  Preencha com suas informações reais.
-#  Esses dados são usados para responder perguntas de triagem,
-#  gerar cover letters e fazer o matching com as vagas.
+#  Fill in with your real information.
+#  This file drives AI matching, cover letter generation,
+#  and automatic answers to screening questions.
 # ============================================================
 
 personal:
-  name: "Pedro Henrique"
-  email: "pedrook16@gmail.com"
-  phone: "+55 (XX) XXXXX-XXXX"
-  location: "Brasil"
-  linkedin_url: "https://linkedin.com/in/seu-perfil"
-  github_url: "https://github.com/seu-usuario"
+  name: "Your Name"
+  email: "you@email.com"
+  phone: "+1 (555) 000-0000"
+  location: "Brazil"
+  linkedin_url: "https://linkedin.com/in/your-profile"
+  github_url: "https://github.com/your-username"
   portfolio_url: ""
-  date_of_birth: ""   # opcional, ex: 1998-01-15
+  date_of_birth: ""   # optional, e.g. 1998-01-15
 
 professional:
-  current_role: "Desenvolvedor de Software"
+  current_role: "Software Developer"
   experience_years: 3
   summary: |
-    Desenvolvedor de software com experiência em backend e APIs RESTful.
-    Apaixonado por resolver problemas complexos com código limpo e eficiente.
+    Software developer with experience in backend systems and RESTful APIs.
+    Passionate about solving complex problems with clean, efficient code.
 
 skills:
   technical:
@@ -34,95 +34,95 @@ skills:
     - Git
     - AWS
   soft:
-    - Trabalho em equipe
-    - Comunicação clara
-    - Resolução de problemas
-    - Aprendizado rápido
+    - Teamwork
+    - Clear communication
+    - Problem solving
+    - Fast learner
 
 education:
-  - degree: "Bacharelado em Ciência da Computação"
-    institution: "Universidade XYZ"
-    field_of_study: "Ciência da Computação"
+  - degree: "Bachelor's in Computer Science"
+    institution: "University XYZ"
+    field_of_study: "Computer Science"
     graduation_year: 2022
-    gpa: ""   # opcional
+    gpa: ""   # optional
 
 experience:
-  - position: "Desenvolvedor Backend"
-    company: "Empresa Anterior"
-    period: "01/2022 - Presente"
-    location: "Remoto"
+  - position: "Backend Developer"
+    company: "Previous Company"
+    period: "01/2022 - Present"
+    location: "Remote"
     responsibilities:
-      - "Desenvolvimento de APIs REST com Python/FastAPI"
-      - "Manutenção e evolução de serviços em produção"
+      - "Built REST APIs with Python/FastAPI"
+      - "Maintained and evolved production services"
     skills_acquired:
       - Python
       - PostgreSQL
       - Docker
 
 projects:
-  - name: "apply-job"
-    description: "Workflow automatizado de candidaturas com IA"
-    link: "https://github.com/seu-usuario/apply-job"
+  - name: "applyr"
+    description: "Automated job application workflow powered by AI"
+    link: "https://github.com/pedrohrod/applyr"
 
 certifications: []
 
 languages:
-  - language: "Português"
-    proficiency: "Nativo"
-  - language: "Inglês"
-    proficiency: "Avançado"
+  - language: "Portuguese"
+    proficiency: "Native"
+  - language: "English"
+    proficiency: "Advanced"
 
 interests:
   - Open Source
-  - Inteligência Artificial
-  - Sistemas distribuídos
+  - Artificial Intelligence
+  - Distributed Systems
 
 # ------------------------------------------------------------
-# Disponibilidade
+# Availability
 # ------------------------------------------------------------
 availability:
-  notice_period: "Imediato"   # ex: "2 semanas", "1 mês", "Imediato"
+  notice_period: "Immediately"   # e.g. "2 weeks", "1 month", "Immediately"
 
 # ------------------------------------------------------------
-# Pretensão salarial
-# Usado para responder perguntas de formulário e cover letter
+# Salary expectations
+# Used to answer form questions and in cover letters
 # ------------------------------------------------------------
 salary_expectations:
-  range: "R$ 8.000 - R$ 12.000"   # ou "USD 50k - 80k" para vagas internacionais
+  range: "USD 80,000 - 120,000"   # or "R$ 8.000 - R$ 12.000" for local jobs
 
 # ------------------------------------------------------------
-# Auto-identificação (perguntas de diversidade / EEO)
-# Deixe em branco os campos que preferir não informar
+# Self-identification (diversity / EEO questions)
+# Leave blank for fields you prefer not to disclose
 # ------------------------------------------------------------
 self_identification:
   gender: ""
   pronouns: ""
-  veteran: "Não"
-  disability: "Não"
+  veteran: "No"
+  disability: "No"
   ethnicity: ""
 
 # ------------------------------------------------------------
-# Autorização de trabalho
-# Usado para responder perguntas de formulário automaticamente
+# Work authorization
+# Used to automatically answer work authorization questions
 # ------------------------------------------------------------
 legal_authorization:
-  brazil_work_authorization: "Sim"
-  requires_brazil_sponsorship: "Não"
-  us_work_authorization: "Não"
-  requires_us_visa: "Sim"
-  requires_us_sponsorship: "Sim"
-  eu_work_authorization: "Não"
-  requires_eu_visa: "Sim"
-  requires_eu_sponsorship: "Sim"
+  brazil_work_authorization: "Yes"
+  requires_brazil_sponsorship: "No"
+  us_work_authorization: "No"
+  requires_us_visa: "Yes"
+  requires_us_sponsorship: "Yes"
+  eu_work_authorization: "No"
+  requires_eu_visa: "Yes"
+  requires_eu_sponsorship: "Yes"
 
 # ------------------------------------------------------------
-# Preferências de trabalho
-# Usado para responder perguntas de formulário automaticamente
+# Work preferences
+# Used to automatically answer employer questions
 # ------------------------------------------------------------
 work_preferences:
-  remote_work: "Sim"
-  in_person_work: "Sim"
-  open_to_relocation: "Sim"
-  willing_to_complete_assessments: "Sim"
-  willing_to_undergo_drug_tests: "Sim"
-  willing_to_undergo_background_checks: "Sim"
+  remote_work: "Yes"
+  in_person_work: "Yes"
+  open_to_relocation: "Yes"
+  willing_to_complete_assessments: "Yes"
+  willing_to_undergo_drug_tests: "Yes"
+  willing_to_undergo_background_checks: "Yes"

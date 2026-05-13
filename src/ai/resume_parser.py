@@ -6,7 +6,7 @@ from loguru import logger
 def parse_resume(path: str) -> str:
     file = Path(path)
     if not file.exists():
-        raise FileNotFoundError(f"Currículo não encontrado: {path}")
+        raise FileNotFoundError(f"Resume not found: {path}")
 
     suffix = file.suffix.lower()
 
@@ -15,7 +15,7 @@ def parse_resume(path: str) -> str:
     elif suffix in (".txt", ".md"):
         return file.read_text(encoding="utf-8")
     else:
-        raise ValueError(f"Formato não suportado: {suffix}. Use PDF ou TXT.")
+        raise ValueError(f"Unsupported format: {suffix}. Use PDF or TXT.")
 
 
 def _parse_pdf(path: Path) -> str:
@@ -26,5 +26,5 @@ def _parse_pdf(path: Path) -> str:
             if text:
                 text_parts.append(text)
     full_text = "\n".join(text_parts)
-    logger.debug(f"Currículo extraído: {len(full_text)} caracteres de {len(text_parts)} página(s)")
+    logger.debug(f"Resume parsed: {len(full_text)} characters from {len(text_parts)} page(s)")
     return full_text

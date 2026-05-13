@@ -2,18 +2,17 @@ job_search:
   keywords:
     - "Software Engineer"
     - "Backend Developer"
-    - "Desenvolvedor Backend"
     - "Python Developer"
 
   locations:
-    - "Brasil"
+    - "Brazil"
 
-  # Modalidade de trabalho
+  # Work modality
   remote: true
   hybrid: true
   onsite: false
 
-  # Nível de experiência (LinkedIn)
+  # Experience level (LinkedIn filters)
   experience_level:
     internship: false
     entry: true
@@ -22,7 +21,7 @@ job_search:
     director: false
     executive: false
 
-  # Tipo de contrato
+  # Contract type
   job_types:
     full_time: true
     contract: true
@@ -32,39 +31,39 @@ job_search:
     other: false
     volunteer: false
 
-  # Filtro de data de publicação
-  # Opções: all_time | month | week | 24_hours
+  # Date posted filter
+  # Options: all_time | month | week | 24_hours
   date_posted: "month"
 
-  # Distância máxima em km/milhas (LinkedIn)
-  # Valores aceitos: 0, 5, 10, 25, 50, 100
+  # Maximum distance in km/miles (LinkedIn)
+  # Accepted values: 0, 5, 10, 25, 50, 100
   distance: 0
 
 filters:
-  # Empresas para ignorar (qualquer match parcial no nome)
+  # Skip jobs from these companies (partial match on company name)
   company_blacklist:
     - "Stefanini"
     - "Wipro"
     - "Infosys"
 
-  # Palavras no título da vaga para ignorar
+  # Skip jobs with these words in the title
   title_blacklist:
     - "Senior Principal"
-    - "Diretor"
+    - "Director"
     - "VP "
     - "Head of"
 
-  # Localizações para ignorar
+  # Skip jobs in these locations
   location_blacklist:
     - "India"
     - "China"
 
-  # Não aplicar mais de uma vaga na mesma empresa por sessão
+  # Do not apply to the same company more than once per session
   apply_once_at_company: true
 
 matching:
-  threshold: 70           # score mínimo (0-100) para aplicar
-  max_jobs_per_run: 100   # máximo de vagas a avaliar por execução
+  threshold: 70          # minimum score (0–100) to apply
+  max_jobs_per_run: 100  # maximum jobs to evaluate per run
 
 platforms:
   linkedin:
@@ -80,7 +79,7 @@ application:
   delay_between_seconds: 45
   randomize_delay: true
   attach_cover_letter: true
-  max_per_session: 50      # limite total de aplicações por sessão
+  max_per_session: 50     # total application cap per session
 
 tracking:
   database: "data/applications.db"
@@ -89,4 +88,4 @@ tracking:
 
 logging:
   level: "INFO"
-  file: "logs/apply-job.log"
+  file: "logs/applyr.log"
