@@ -15,6 +15,8 @@ from src.ai.question_answerer import QuestionAnswerer
 from src.applicator.linkedin import LinkedInApplicator
 from src.applicator.gupy import GupyApplicator
 from src.tracker.db import Tracker
+from src.notifier.dispatcher import NotificationDispatcher
+from src.i18n.prompts import get_locale
 
 
 class Orchestrator:
@@ -32,9 +34,12 @@ class Orchestrator:
         resume_path = "resume/resume.pdf"
         self.resume_text = parse_resume(resume_path)
 
-        self.matcher = JobMatcher(provider)
-        self.cover_gen = CoverLetterGenerator(provider)
-        self.qa = QuestionAnswerer(provider, profile)
+        lang = settings.get("language", "auto")
+        locale = get_locale(lang) if lang != "auto" else None
+
+        self.matcher = JobMatcher(provider, locale=locale)
+        self.cover_gen = CoverLetterGenerator(provider, locale=locale)
+        self.qa = QuestionAnswerer(provider, profile, locale=locale)
 
         # shared browser — login once, reuse across all scraping + applying
         self.browser = SharedBrowser()
@@ -52,6 +57,8 @@ class Orchestrator:
         db_url = f"sqlite:///{settings['tracking']['database']}"
         csv_path = settings["tracking"].get("csv_path") if settings["tracking"].get("export_csv") else None
         self.tracker = Tracker(db_url, csv_path)
+
+        self.notifier = NotificationDispatcher.from_settings(settings)
 
         m = settings["matching"]
         self.threshold = m["threshold"]
@@ -183,6 +190,11 @@ class Orchestrator:
                 total_applied += 1
                 daily_counts[job.platform] = daily_counts.get(job.platform, 0) + 1
                 companies_this_session.add(job.company.lower())
+                await self.notifier.notify_applied(
+                    job.title, job.company, job.platform, match.score, job.url
+                )
+            else:
+                await self.notifier.notify_failed(job.title, job.company, "application failed")
 
             delay = self.delay
             if self.randomize:

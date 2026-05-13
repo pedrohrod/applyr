@@ -89,3 +89,18 @@ tracking:
 logging:
   level: "INFO"
   file: "logs/applyr.log"
+
+# Language for AI-generated content
+# Options: auto | en | pt | es | de | fr
+# "auto" detects the language from the job posting text
+language: "auto"
+
+notifications:
+  telegram:
+    enabled: false
+    # Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID in .env
+  email:
+    enabled: false
+    # Set SMTP_HOST, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD, NOTIFY_TO in .env
+    smtp_host: "smtp.gmail.com"
+    smtp_port: 587

@@ -32,7 +32,7 @@ def test_detects_portuguese_job(mock_provider, sample_profile):
     job = {"title": "Desenvolvedor Backend", "description": "empresa brasileira requisitos experiência vaga", "company": "X"}
     gen.generate("resume", job, sample_profile)
     prompt = mock_provider.complete.call_args[0][0]
-    assert "Portuguese" in prompt
+    assert "português" in prompt
 
 
 def test_salary_included_when_present(mock_provider, sample_profile):

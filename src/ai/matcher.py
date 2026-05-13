@@ -3,6 +3,7 @@ import json
 from dataclasses import dataclass, field
 from loguru import logger
 from src.ai.llm_provider import LLMProvider
+from src.i18n.prompts import PromptLocale, LOCALES
 
 
 @dataclass
@@ -14,8 +15,9 @@ class MatchResult:
 
 
 class JobMatcher:
-    def __init__(self, provider: LLMProvider):
+    def __init__(self, provider: LLMProvider, locale: PromptLocale | None = None):
         self.provider = provider
+        self.locale = locale or LOCALES["en"]
 
     def score(self, resume_text: str, job: dict) -> MatchResult:
         prompt = f"""You are an expert tech recruiter. Analyze the match between the resume and the job posting below.
@@ -30,7 +32,7 @@ Description: {job.get('description', '')}
 Requirements: {job.get('requirements', '')}
 
 ## INSTRUCTIONS
-Return ONLY a valid JSON with this structure:
+Return ONLY a valid JSON with this exact structure:
 {{
   "score": <integer from 0 to 100>,
   "strong_matches": ["skills or experience that align with the job"],
@@ -43,6 +45,8 @@ Score criteria:
 - 70-89: Good fit, worth applying
 - 50-69: Partial fit, could try
 - 0-49: Weak fit, not recommended
+
+{self.locale.score_instruction}
 """
         try:
             raw = self.provider.complete(prompt, max_tokens=512)

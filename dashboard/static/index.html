@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>applyr — dashboard</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header>
+    <span class="logo">applyr</span>
+    <span class="subtitle">application tracker</span>
+  </header>
+
+  <main>
+    <!-- Stats row -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-total">—</div>
+        <div class="stat-label">Total evaluated</div>
+      </div>
+      <div class="stat-card accent-green">
+        <div class="stat-value" id="stat-applied">—</div>
+        <div class="stat-label">Applied</div>
+      </div>
+      <div class="stat-card accent-yellow">
+        <div class="stat-value" id="stat-skipped">—</div>
+        <div class="stat-label">Skipped</div>
+      </div>
+      <div class="stat-card accent-red">
+        <div class="stat-value" id="stat-failed">—</div>
+        <div class="stat-label">Failed</div>
+      </div>
+      <div class="stat-card accent-blue">
+        <div class="stat-value" id="stat-avg">—</div>
+        <div class="stat-label">Avg match score</div>
+      </div>
+    </section>
+
+    <!-- Charts row -->
+    <section class="charts-grid">
+      <div class="chart-card wide">
+        <h3>Applications over time</h3>
+        <canvas id="timeline-chart"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>Score distribution</h3>
+        <canvas id="score-chart"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>By platform</h3>
+        <canvas id="platform-chart"></canvas>
+      </div>
+    </section>
+
+    <!-- Top companies -->
+    <section class="charts-grid">
+      <div class="chart-card wide">
+        <h3>Top companies applied to</h3>
+        <canvas id="companies-chart"></canvas>
+      </div>
+    </section>
+
+    <!-- Applications table -->
+    <section class="table-section">
+      <div class="table-header">
+        <h3>Applications</h3>
+        <div class="filters">
+          <select id="filter-status">
+            <option value="">All statuses</option>
+            <option value="applied">Applied</option>
+            <option value="skipped">Skipped</option>
+            <option value="failed">Failed</option>
+          </select>
+          <select id="filter-platform">
+            <option value="">All platforms</option>
+            <option value="linkedin">LinkedIn</option>
+            <option value="gupy">Gupy</option>
+          </select>
+          <button id="filter-apply">Filter</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Title</th>
+              <th>Company</th>
+              <th>Location</th>
+              <th>Platform</th>
+              <th>Score</th>
+              <th>Status</th>
+              <th>Link</th>
+            </tr>
+          </thead>
+          <tbody id="applications-tbody"></tbody>
+        </table>
+      </div>
+      <div class="pagination" id="pagination"></div>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -6,6 +6,8 @@ import yaml
 from loguru import logger
 
 
+VALID_LANGUAGES = {"auto", "en", "pt", "es", "de", "fr"}
+
 REQUIRED_BY_PROVIDER = {
     "anthropic": ["ANTHROPIC_API_KEY"],
     "openai": ["OPENAI_API_KEY"],
@@ -74,6 +76,22 @@ def validate(settings: dict, resume_path: str = "resume/resume.pdf") -> None:
         keywords = settings.get("job_search", {}).get("keywords", [])
         if not keywords:
             errors.append("job_search.keywords cannot be empty when any platform is enabled")
+
+    # language
+    lang = settings.get("language", "auto")
+    if lang not in VALID_LANGUAGES:
+        errors.append(f"language='{lang}' is invalid. Valid: {', '.join(sorted(VALID_LANGUAGES))}")
+
+    # notification env vars (only warn, not fatal — notifications are optional)
+    notif = settings.get("notifications", {})
+    if notif.get("telegram", {}).get("enabled"):
+        for var in ("TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID"):
+            if not os.environ.get(var):
+                errors.append(f"Missing env var: {var} (required because notifications.telegram is enabled)")
+    if notif.get("email", {}).get("enabled"):
+        for var in ("SMTP_USERNAME", "SMTP_PASSWORD", "NOTIFY_TO"):
+            if not os.environ.get(var):
+                errors.append(f"Missing env var: {var} (required because notifications.email is enabled)")
 
     if errors:
         logger.error("Configuration errors found — fix them before running:\n")

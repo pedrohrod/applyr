@@ -3,10 +3,24 @@ services:
     build: .
     env_file: .env
     volumes:
-      - ./resume:/app/resume       # coloque seu resume.pdf aqui
-      - ./data:/app/data           # banco SQLite e CSV de resultados
-      - ./logs:/app/logs           # logs de execução
-      - ./config:/app/config       # settings.yaml e profile.yaml
+      - ./resume:/app/resume       # place your resume.pdf here
+      - ./data:/app/data           # SQLite database and CSV results
+      - ./logs:/app/logs           # execution logs
+      - ./config:/app/config       # settings.yaml and profile.yaml
     environment:
       - PYTHONUNBUFFERED=1
-    restart: "no"                  # executa uma vez e para (use "always" para rodar continuamente)
+    restart: "no"                  # runs once and stops (use "always" to run continuously)
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.dashboard
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/app/data:ro        # read-only access to the database
+    environment:
+      - DB_PATH=/app/data/applications.db
+    restart: unless-stopped
+    depends_on:
+      - apply-job

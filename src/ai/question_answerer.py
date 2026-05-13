@@ -2,14 +2,16 @@ from __future__ import annotations
 import json
 from loguru import logger
 from src.ai.llm_provider import LLMProvider
+from src.i18n.prompts import PromptLocale, LOCALES
 
 
 class QuestionAnswerer:
     """Answers screening questions found in job application forms."""
 
-    def __init__(self, provider: LLMProvider, profile: dict):
+    def __init__(self, provider: LLMProvider, profile: dict, locale: PromptLocale | None = None):
         self.provider = provider
         self.profile = profile
+        self.locale = locale or LOCALES["en"]
 
     def answer(self, question: str, options: list[str] | None = None) -> str:
         options_text = ""
@@ -28,7 +30,7 @@ class QuestionAnswerer:
 ## INSTRUCTIONS
 Return ONLY the answer, no explanations, no extra punctuation.
 If it is a multiple-choice question, return exactly one of the options.
-If it is free text, be concise (maximum 2 sentences).
+{self.locale.answer_instruction}
 """
         try:
             return self.provider.complete(prompt, max_tokens=200)
