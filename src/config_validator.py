@@ -66,10 +66,18 @@ def validate(settings: dict, resume_path: str = "resume/resume.pdf") -> None:
         errors.append(f"job_search.distance={distance} is invalid. Valid: {sorted(VALID_DISTANCES)}")
 
     # daily limits sanity
-    for platform in ("linkedin", "gupy"):
+    for platform in ("linkedin", "gupy", "portals"):
         limit = platforms.get(platform, {}).get("daily_limit", 1)
         if not isinstance(limit, int) or limit < 1:
             errors.append(f"platforms.{platform}.daily_limit must be a positive integer, got: {limit!r}")
+
+    # portal consistency — if portals enabled, linkedin must have easy_apply_only: false
+    if platforms.get("portals", {}).get("enabled"):
+        if platforms.get("linkedin", {}).get("easy_apply_only", True):
+            errors.append(
+                "platforms.portals.enabled=true requires platforms.linkedin.easy_apply_only=false "
+                "(otherwise non-Easy-Apply jobs are never scraped)"
+            )
 
     # keywords must not be empty if any platform is enabled
     if any(platforms.get(p, {}).get("enabled") for p in ("linkedin", "gupy")):

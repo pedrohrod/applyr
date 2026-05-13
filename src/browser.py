@@ -26,6 +26,7 @@ class SharedBrowser:
         self._browser: Browser | None = None
         self._linkedin_ctx: BrowserContext | None = None
         self._gupy_ctx: BrowserContext | None = None
+        self._portal_ctx: BrowserContext | None = None
 
     async def start(self) -> None:
         self._playwright = await async_playwright().start()
@@ -44,6 +45,15 @@ class SharedBrowser:
         if not self._gupy_ctx:
             self._gupy_ctx = await self._browser.new_context(user_agent=USER_AGENT)
         return await self._gupy_ctx.new_page()
+
+    async def portal_page(self) -> Page:
+        """Fresh page for external ATS portals (Greenhouse, Lever, …). No login required."""
+        if not self._portal_ctx:
+            self._portal_ctx = await self._browser.new_context(
+                user_agent=USER_AGENT,
+                viewport={"width": 1280, "height": 800},
+            )
+        return await self._portal_ctx.new_page()
 
     async def login_linkedin(self, email: str, password: str) -> bool:
         page = await self.linkedin_page()

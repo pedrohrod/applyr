@@ -14,6 +14,7 @@ from src.ai.cover_letter import CoverLetterGenerator
 from src.ai.question_answerer import QuestionAnswerer
 from src.applicator.linkedin import LinkedInApplicator
 from src.applicator.gupy import GupyApplicator
+from src.applicator.portal_router import PortalRouter
 from src.tracker.db import Tracker
 from src.notifier.dispatcher import NotificationDispatcher
 from src.i18n.prompts import get_locale
@@ -53,6 +54,7 @@ class Orchestrator:
 
         self.linkedin_applicator = LinkedInApplicator(self.browser, resume_path, self.qa)
         self.gupy_applicator = GupyApplicator(self.browser, resume_path, self.qa)
+        self.portal_router = PortalRouter(self.browser, resume_path, self.qa)
 
         db_url = f"sqlite:///{settings['tracking']['database']}"
         csv_path = settings["tracking"].get("csv_path") if settings["tracking"].get("export_csv") else None
@@ -90,7 +92,6 @@ class Orchestrator:
 
     async def run(self) -> None:
         logger.info("=== Starting applyr workflow ===")
-
         await self.browser.start()
         try:
             await self._run_workflow()
@@ -103,8 +104,12 @@ class Orchestrator:
         keywords = js["keywords"]
         locations = js.get("locations", ["Brazil"])
 
+        ln_cfg = platforms.get("linkedin", {})
+        easy_apply_only = ln_cfg.get("easy_apply_only", True)
+        portals_enabled = platforms.get("portals", {}).get("enabled", False)
+
         # login once per platform
-        if platforms.get("linkedin", {}).get("enabled"):
+        if ln_cfg.get("enabled"):
             ok = await self.browser.login_linkedin(self._linkedin_email, self._linkedin_password)
             if not ok:
                 logger.error("LinkedIn login failed — disabling LinkedIn for this run")
@@ -118,15 +123,18 @@ class Orchestrator:
         # scrape
         jobs: list[Job] = []
         if platforms.get("linkedin", {}).get("enabled"):
-            jobs.extend(await self.linkedin_scraper.scrape_jobs(keywords, locations[0], self.max_jobs))
+            jobs.extend(await self.linkedin_scraper.scrape_jobs(
+                keywords, locations[0], self.max_jobs, easy_apply_only=easy_apply_only
+            ))
         if platforms.get("gupy", {}).get("enabled"):
             jobs.extend(await self.gupy_scraper.scrape_jobs(keywords, self.max_jobs))
 
         logger.info(f"Total jobs collected: {len(jobs)}")
 
-        ln_limit = platforms.get("linkedin", {}).get("daily_limit", 40)
+        ln_limit = ln_cfg.get("daily_limit", 40)
         gupy_limit = platforms.get("gupy", {}).get("daily_limit", 30)
-        daily_counts: dict[str, int] = {"linkedin": 0, "gupy": 0}
+        portal_limit = platforms.get("portals", {}).get("daily_limit", 20)
+        daily_counts: dict[str, int] = {"linkedin": 0, "gupy": 0, "portals": 0}
         companies_this_session: set[str] = set()
         total_applied = 0
 
@@ -139,9 +147,13 @@ class Orchestrator:
                 logger.debug(f"Skipping (already handled): {job.title} @ {job.company}")
                 continue
 
-            limit = ln_limit if job.platform == "linkedin" else gupy_limit
-            if daily_counts.get(job.platform, 0) >= limit:
-                logger.debug(f"Daily limit reached for {job.platform}")
+            # determine which counter/limit applies
+            counter_key = "linkedin" if (job.platform == "linkedin" and job.easy_apply) else \
+                          "portals" if (job.platform == "linkedin" and not job.easy_apply) else \
+                          job.platform
+            limit_map = {"linkedin": ln_limit, "gupy": gupy_limit, "portals": portal_limit}
+            if daily_counts.get(counter_key, 0) >= limit_map.get(counter_key, 999):
+                logger.debug(f"Daily limit reached for {counter_key}")
                 continue
 
             if self.apply_once_at_company and job.company.lower() in companies_this_session:
@@ -179,7 +191,14 @@ class Orchestrator:
 
             success = False
             if job.platform == "linkedin":
-                success = await self.linkedin_applicator.apply(job, cover_letter)
+                if job.easy_apply:
+                    success = await self.linkedin_applicator.apply(job, cover_letter)
+                elif portals_enabled:
+                    success = await self.portal_router.apply(job, cover_letter)
+                else:
+                    logger.debug(f"Non-Easy-Apply LinkedIn job skipped (portals disabled): {job.title}")
+                    self.tracker.record(job, match.score, "skipped", notes="portals_disabled")
+                    continue
             elif job.platform == "gupy":
                 success = await self.gupy_applicator.apply(job, cover_letter)
 
@@ -188,7 +207,7 @@ class Orchestrator:
 
             if success:
                 total_applied += 1
-                daily_counts[job.platform] = daily_counts.get(job.platform, 0) + 1
+                daily_counts[counter_key] = daily_counts.get(counter_key, 0) + 1
                 companies_this_session.add(job.company.lower())
                 await self.notifier.notify_applied(
                     job.title, job.company, job.platform, match.score, job.url

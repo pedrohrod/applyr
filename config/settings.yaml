@@ -69,11 +69,16 @@ platforms:
   linkedin:
     enabled: true
     daily_limit: 40
+    easy_apply_only: true     # false = also scrapes jobs that redirect to external portals
   gupy:
     enabled: true
     daily_limit: 30
   portals:
-    enabled: false
+    enabled: false            # set true to apply via Greenhouse / Lever
+    daily_limit: 20
+    greenhouse: true
+    lever: true
+    workday: false            # not yet supported
 
 application:
   delay_between_seconds: 45
