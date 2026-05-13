@@ -1,49 +1,62 @@
 <div align="center">
 
-# applyr
+# 🚀 applyr
 
-**Automated job application workflow powered by AI.**
+**Stop applying manually. Let AI do it for you.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/)
 [![Docker](https://img.shields.io/badge/docker-ready-2496ED.svg)](https://www.docker.com/)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/pedrohrod/applyr/pulls)
 
-Scrapes jobs from LinkedIn and Gupy, scores each one against your resume, generates a tailored cover letter, and applies automatically — all inside a Docker container.
+applyr scrapes jobs from LinkedIn and Gupy, scores each one against your resume with AI, generates a tailored cover letter, and applies automatically — all inside a Docker container.
 
-[Getting Started](#setup) · [Configuration](#configuration) · [Contributing](#contributing) · [Roadmap](#roadmap)
+[⚡ Getting Started](#setup) · [⚙️ Configuration](#configuration) · [🤝 Contributing](#contributing) · [🗺️ Roadmap](#roadmap)
 
 </div>
 
 ---
 
-## How it works
+## 🧠 How it works
 
 ```
-Scrapers (LinkedIn · Gupy)
+🔍 Scrapers (LinkedIn · Gupy)
         ↓
-  Filters (blacklist, level, type, date)
+🚫 Filters (blacklist, level, type, date)
         ↓
-  AI Match score (0–100)
+🤖 AI Match score (0–100)
         ↓  score ≥ threshold
-  Tailored cover letter
+✍️  Tailored cover letter
         ↓
-  Auto-apply (Playwright)
+📨 Auto-apply (Playwright)
         ↓
-  Tracking (SQLite + CSV)
+📊 Tracking (SQLite + CSV)
 ```
 
 ---
 
-## Requirements
+## ✨ Features
 
-- [Docker](https://docs.docker.com/get-docker/) and Docker Compose
-- LinkedIn and/or Gupy account
-- API key for one of the supported AI providers
+- 🔍 **Multi-platform scraping** — LinkedIn Easy Apply and Gupy out of the box
+- 🤖 **AI-powered matching** — scores each job against your resume (0–100) before applying
+- ✍️ **Tailored cover letters** — generated per job, not a template
+- 💬 **Smart form filling** — AI answers screening questions based on your profile
+- 🚫 **Blacklists & filters** — skip companies, titles, locations, experience levels you don't want
+- 🔌 **Provider-agnostic AI** — works with Anthropic, OpenAI, Gemini, or Ollama (local/free)
+- 📊 **Full tracking** — every application logged to SQLite and exportable as CSV
+- 🐳 **Docker-ready** — one command to run, no environment setup headaches
 
 ---
 
-## Setup
+## 📋 Requirements
+
+- 🐳 [Docker](https://docs.docker.com/get-docker/) and Docker Compose
+- 💼 LinkedIn and/or Gupy account
+- 🔑 API key for one of the supported AI providers
+
+---
+
+## ⚡ Setup
 
 ```bash
 git clone https://github.com/pedrohrod/applyr.git
@@ -54,9 +67,9 @@ cp .env.example .env
 
 ---
 
-## Configuration
+## ⚙️ Configuration
 
-### 1. Environment variables (`.env`)
+### 1. 🔑 Environment variables (`.env`)
 
 ```env
 # AI provider: anthropic | openai | gemini | ollama
@@ -74,7 +87,7 @@ GUPY_EMAIL=you@email.com
 GUPY_PASSWORD=yourpassword
 ```
 
-### 2. Supported AI providers
+### 2. 🤖 Supported AI providers
 
 | Provider | Default model | Required variable |
 |---|---|---|
@@ -85,7 +98,7 @@ GUPY_PASSWORD=yourpassword
 
 Switch providers by changing `LLM_PROVIDER` in `.env` — no code changes required.
 
-### 3. Job search preferences (`config/settings.yaml`)
+### 3. 🔍 Job search preferences (`config/settings.yaml`)
 
 ```yaml
 job_search:
@@ -123,12 +136,12 @@ application:
   attach_cover_letter: true
 ```
 
-### 4. Candidate profile (`config/profile.yaml`)
+### 4. 👤 Candidate profile (`config/profile.yaml`)
 
 Fill in your real data. This file drives:
-- AI match scoring against job descriptions
-- Personalized cover letter generation
-- Automatic answers to screening questions in application forms
+- 🤖 AI match scoring against job descriptions
+- ✍️ Personalized cover letter generation
+- 💬 Automatic answers to screening questions in application forms
 
 Key fields:
 
@@ -152,7 +165,7 @@ work_preferences:
   willing_to_undergo_background_checks: "Yes"
 ```
 
-### 5. Resume
+### 5. 📄 Resume
 
 Place your resume PDF in the `resume/` folder:
 
@@ -162,7 +175,7 @@ cp /path/to/your/resume.pdf resume/resume.pdf
 
 ---
 
-## Running
+## 🐳 Running
 
 ```bash
 docker compose up --build
@@ -177,7 +190,7 @@ docker compose logs -f
 
 ---
 
-## Output
+## 📊 Output
 
 After each run, results are saved in `data/`:
 
@@ -191,17 +204,18 @@ CSV columns: `date`, `company`, `title`, `platform`, `score`, `url`, `cover_lett
 
 ---
 
-## Supported platforms
+## 🌐 Supported platforms
 
 | Platform | Scraping | Auto-apply |
 |---|---|---|
 | LinkedIn Easy Apply | ✅ | ✅ |
 | Gupy | ✅ | ✅ |
-| Company portals (Greenhouse, Lever) | 🔜 | 🔜 |
+| Greenhouse / Lever / Workday | 🔜 | 🔜 |
+| Indeed | 🔜 | 🔜 |
 
 ---
 
-## Project structure
+## 🗂️ Project structure
 
 ```
 applyr/
@@ -235,28 +249,29 @@ applyr/
 
 ---
 
-## Roadmap
+## 🗺️ Roadmap
 
-- [ ] Greenhouse / Lever / Workday portal support
-- [ ] Web dashboard to visualize application history
-- [ ] Resume auto-tailoring per job (keyword injection)
-- [ ] Email follow-up scheduling
-- [ ] Multi-language support for non-English job boards
-- [ ] Indeed scraper + auto-apply
+- [ ] 🌐 Greenhouse / Lever / Workday portal support
+- [ ] 📈 Web dashboard to visualize application history
+- [ ] 🧬 Resume auto-tailoring per job (keyword injection)
+- [ ] 📧 Email follow-up scheduling
+- [ ] 🌍 Multi-language support for non-English job boards
+- [ ] 🔍 Indeed scraper + auto-apply
+- [ ] 🧪 Test suite
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
 Contributions are very welcome! Here's how to get started:
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/new-platform`)
-3. Commit your changes (`git commit -m 'feat: add Indeed scraper'`)
-4. Push to your branch (`git push origin feature/new-platform`)
-5. Open a Pull Request
+1. 🍴 Fork the repository
+2. 🌿 Create a feature branch (`git checkout -b feature/new-platform`)
+3. 💾 Commit your changes (`git commit -m 'feat: add Indeed scraper'`)
+4. 📤 Push to your branch (`git push origin feature/new-platform`)
+5. 🔁 Open a Pull Request
 
-**Ideas for contribution:**
+**💡 Ideas for contribution:**
 - Add scrapers for new platforms (Indeed, Glassdoor, Workday, Lever, Greenhouse)
 - Improve the AI matching prompt
 - Add tests
@@ -267,7 +282,7 @@ Please open an [issue](https://github.com/pedrohrod/applyr/issues) first for maj
 
 ---
 
-## Disclaimer
+## ⚠️ Disclaimer
 
 This project automates actions on third-party platforms. Use responsibly:
 
@@ -277,6 +292,6 @@ This project automates actions on third-party platforms. Use responsibly:
 
 ---
 
-## License
+## 📄 License
 
 [MIT](LICENSE) © 2026 Pedro Henrique
