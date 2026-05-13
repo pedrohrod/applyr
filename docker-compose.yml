@@ -1,0 +1,12 @@
+services:
+  apply-job:
+    build: .
+    env_file: .env
+    volumes:
+      - ./resume:/app/resume       # coloque seu resume.pdf aqui
+      - ./data:/app/data           # banco SQLite e CSV de resultados
+      - ./logs:/app/logs           # logs de execução
+      - ./config:/app/config       # settings.yaml e profile.yaml
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: "no"                  # executa uma vez e para (use "always" para rodar continuamente)

@@ -1,0 +1,92 @@
+job_search:
+  keywords:
+    - "Software Engineer"
+    - "Backend Developer"
+    - "Desenvolvedor Backend"
+    - "Python Developer"
+
+  locations:
+    - "Brasil"
+
+  # Modalidade de trabalho
+  remote: true
+  hybrid: true
+  onsite: false
+
+  # Nível de experiência (LinkedIn)
+  experience_level:
+    internship: false
+    entry: true
+    associate: true
+    mid_senior_level: true
+    director: false
+    executive: false
+
+  # Tipo de contrato
+  job_types:
+    full_time: true
+    contract: true
+    part_time: false
+    temporary: false
+    internship: false
+    other: false
+    volunteer: false
+
+  # Filtro de data de publicação
+  # Opções: all_time | month | week | 24_hours
+  date_posted: "month"
+
+  # Distância máxima em km/milhas (LinkedIn)
+  # Valores aceitos: 0, 5, 10, 25, 50, 100
+  distance: 0
+
+filters:
+  # Empresas para ignorar (qualquer match parcial no nome)
+  company_blacklist:
+    - "Stefanini"
+    - "Wipro"
+    - "Infosys"
+
+  # Palavras no título da vaga para ignorar
+  title_blacklist:
+    - "Senior Principal"
+    - "Diretor"
+    - "VP "
+    - "Head of"
+
+  # Localizações para ignorar
+  location_blacklist:
+    - "India"
+    - "China"
+
+  # Não aplicar mais de uma vaga na mesma empresa por sessão
+  apply_once_at_company: true
+
+matching:
+  threshold: 70           # score mínimo (0-100) para aplicar
+  max_jobs_per_run: 100   # máximo de vagas a avaliar por execução
+
+platforms:
+  linkedin:
+    enabled: true
+    daily_limit: 40
+  gupy:
+    enabled: true
+    daily_limit: 30
+  portals:
+    enabled: false
+
+application:
+  delay_between_seconds: 45
+  randomize_delay: true
+  attach_cover_letter: true
+  max_per_session: 50      # limite total de aplicações por sessão
+
+tracking:
+  database: "data/applications.db"
+  export_csv: true
+  csv_path: "data/applications.csv"
+
+logging:
+  level: "INFO"
+  file: "logs/apply-job.log"
