@@ -3,6 +3,7 @@ import random
 import os
 from loguru import logger
 
+from src.browser import SharedBrowser
 from src.scrapers.linkedin import LinkedInScraper, Job
 from src.scrapers.gupy import GupyScraper
 from src.ai.resume_parser import parse_resume
@@ -34,11 +35,18 @@ class Orchestrator:
         self.cover_gen = CoverLetterGenerator(provider)
         self.qa = QuestionAnswerer(provider, profile)
 
-        self.linkedin_scraper = LinkedInScraper(linkedin_email, linkedin_password)
+        # shared browser — login once, reuse across all scraping + applying
+        self.browser = SharedBrowser()
+        self._linkedin_email = linkedin_email
+        self._linkedin_password = linkedin_password
+        self._gupy_email = gupy_email
+        self._gupy_password = gupy_password
+
+        self.linkedin_scraper = LinkedInScraper(self.browser)
         self.gupy_scraper = GupyScraper()
 
-        self.linkedin_applicator = LinkedInApplicator(linkedin_email, linkedin_password, resume_path, self.qa)
-        self.gupy_applicator = GupyApplicator(gupy_email, gupy_password, resume_path, self.qa)
+        self.linkedin_applicator = LinkedInApplicator(self.browser, resume_path, self.qa)
+        self.gupy_applicator = GupyApplicator(self.browser, resume_path, self.qa)
 
         db_url = f"sqlite:///{settings['tracking']['database']}"
         csv_path = settings["tracking"].get("csv_path") if settings["tracking"].get("export_csv") else None
@@ -64,35 +72,47 @@ class Orchestrator:
         for term in self.company_blacklist:
             if term in job.company.lower():
                 return True, f"company blacklisted: '{term}'"
-
         for term in self.title_blacklist:
             if term in job.title.lower():
                 return True, f"title blacklisted: '{term}'"
-
         for term in self.location_blacklist:
             if term in job.location.lower():
                 return True, f"location blacklisted: '{term}'"
-
         return False, ""
 
     async def run(self) -> None:
         logger.info("=== Starting applyr workflow ===")
+
+        await self.browser.start()
+        try:
+            await self._run_workflow()
+        finally:
+            await self.browser.close()
+
+    async def _run_workflow(self) -> None:
+        platforms = self.settings["platforms"]
         js = self.settings["job_search"]
         keywords = js["keywords"]
         locations = js.get("locations", ["Brazil"])
-        platforms = self.settings["platforms"]
 
-        jobs: list[Job] = []
-
+        # login once per platform
         if platforms.get("linkedin", {}).get("enabled"):
-            ln_jobs = await self.linkedin_scraper.scrape_jobs(
-                keywords, locations[0], self.max_jobs
-            )
-            jobs.extend(ln_jobs)
+            ok = await self.browser.login_linkedin(self._linkedin_email, self._linkedin_password)
+            if not ok:
+                logger.error("LinkedIn login failed — disabling LinkedIn for this run")
+                platforms["linkedin"]["enabled"] = False
 
         if platforms.get("gupy", {}).get("enabled"):
-            gupy_jobs = await self.gupy_scraper.scrape_jobs(keywords, self.max_jobs)
-            jobs.extend(gupy_jobs)
+            ok = await self.browser.login_gupy(self._gupy_email, self._gupy_password)
+            if not ok:
+                logger.warning("Gupy login failed — will attempt applications anyway")
+
+        # scrape
+        jobs: list[Job] = []
+        if platforms.get("linkedin", {}).get("enabled"):
+            jobs.extend(await self.linkedin_scraper.scrape_jobs(keywords, locations[0], self.max_jobs))
+        if platforms.get("gupy", {}).get("enabled"):
+            jobs.extend(await self.gupy_scraper.scrape_jobs(keywords, self.max_jobs))
 
         logger.info(f"Total jobs collected: {len(jobs)}")
 
@@ -104,11 +124,11 @@ class Orchestrator:
 
         for job in jobs:
             if total_applied >= self.max_per_session:
-                logger.info(f"Session limit of {self.max_per_session} applications reached.")
+                logger.info(f"Session limit of {self.max_per_session} reached.")
                 break
 
-            if self.tracker.already_applied(job.id):
-                logger.debug(f"Already applied: {job.title} @ {job.company}")
+            if self.tracker.should_skip(job.id):
+                logger.debug(f"Skipping (already handled): {job.title} @ {job.company}")
                 continue
 
             limit = ln_limit if job.platform == "linkedin" else gupy_limit

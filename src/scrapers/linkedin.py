@@ -2,7 +2,11 @@ import asyncio
 import random
 from dataclasses import dataclass, field
 from loguru import logger
-from playwright.async_api import async_playwright, Page, BrowserContext
+from playwright.async_api import Page
+
+from src.browser import SharedBrowser, is_captcha
+
+CAPTCHA_WAIT = 90
 
 
 @dataclass
@@ -22,71 +26,55 @@ class Job:
 class LinkedInScraper:
     BASE = "https://www.linkedin.com"
 
-    def __init__(self, email: str, password: str):
-        self.email = email
-        self.password = password
+    def __init__(self, browser: SharedBrowser):
+        self.browser = browser
 
     async def scrape_jobs(
         self,
         keywords: list[str],
         location: str = "Brazil",
         max_jobs: int = 50,
-        experience_levels: list[str] | None = None,
     ) -> list[Job]:
         jobs: list[Job] = []
-        async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True, args=["--no-sandbox"])
-            context = await browser.new_context(
-                user_agent=(
-                    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-                    "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-                )
-            )
-            page = await context.new_page()
-            try:
-                await self._login(page)
-                for keyword in keywords:
-                    if len(jobs) >= max_jobs:
-                        break
-                    found = await self._search_keyword(page, keyword, location, max_jobs - len(jobs))
-                    jobs.extend(found)
-            except Exception as e:
-                logger.error(f"LinkedIn scraping error: {e}")
-            finally:
-                await browser.close()
-        seen = set()
-        unique = []
-        for j in jobs:
-            if j.id not in seen:
-                seen.add(j.id)
-                unique.append(j)
+        page = await self.browser.linkedin_page()
+        try:
+            for keyword in keywords:
+                if len(jobs) >= max_jobs:
+                    break
+                found = await self._search_keyword(page, keyword, location, max_jobs - len(jobs))
+                jobs.extend(found)
+        except Exception as e:
+            logger.error(f"LinkedIn scraping error: {e}")
+        finally:
+            await page.close()
+
+        seen: set[str] = set()
+        unique = [j for j in jobs if not (j.id in seen or seen.add(j.id))]
         logger.info(f"LinkedIn: {len(unique)} unique jobs found")
         return unique
-
-    async def _login(self, page: Page) -> None:
-        logger.info("Logging in to LinkedIn...")
-        await page.goto(f"{self.BASE}/login", wait_until="networkidle")
-        await page.fill("#username", self.email)
-        await page.fill("#password", self.password)
-        await page.click('[type="submit"]')
-        await page.wait_for_url("**/feed**", timeout=15000)
-        logger.info("LinkedIn login successful")
 
     async def _search_keyword(self, page: Page, keyword: str, location: str, limit: int) -> list[Job]:
         jobs: list[Job] = []
         url = (
             f"{self.BASE}/jobs/search/?keywords={keyword.replace(' ', '%20')}"
-            f"&location={location.replace(' ', '%20')}&f_LF=f_AL"  # f_AL = Easy Apply filter
+            f"&location={location.replace(' ', '%20')}&f_LF=f_AL"
         )
         await page.goto(url, wait_until="domcontentloaded")
         await asyncio.sleep(random.uniform(2, 4))
 
-        for page_num in range(5):
+        if await is_captcha(page):
+            logger.warning(f"CAPTCHA during LinkedIn job search — waiting {CAPTCHA_WAIT}s")
+            await asyncio.sleep(CAPTCHA_WAIT)
+            await page.reload()
+            if await is_captcha(page):
+                logger.error("CAPTCHA persists on job search — skipping keyword")
+                return []
+
+        for _ in range(5):
             if len(jobs) >= limit:
                 break
-            cards = await page.query_selector_all(".job-card-container")
-            if not cards:
-                cards = await page.query_selector_all('[data-job-id]')
+            cards = await page.query_selector_all(".job-card-container") or \
+                    await page.query_selector_all('[data-job-id]')
             for card in cards:
                 if len(jobs) >= limit:
                     break
@@ -106,12 +94,11 @@ class LinkedInScraper:
             await card.click()
             await asyncio.sleep(random.uniform(1, 2))
 
-            title = await self._text(page, ".job-details-jobs-unified-top-card__job-title")
-            company = await self._text(page, ".job-details-jobs-unified-top-card__company-name")
-            location = await self._text(page, ".job-details-jobs-unified-top-card__bullet")
-            description = await self._text(page, ".jobs-description__content")
+            title = await _text(page, ".job-details-jobs-unified-top-card__job-title")
+            company = await _text(page, ".job-details-jobs-unified-top-card__company-name")
+            location = await _text(page, ".job-details-jobs-unified-top-card__bullet")
+            description = await _text(page, ".jobs-description__content")
             current_url = page.url
-
             easy_apply = await page.query_selector('button[aria-label*="Easy Apply"]') is not None
 
             if not title or not company:
@@ -131,11 +118,12 @@ class LinkedInScraper:
             logger.debug(f"Failed to extract job card: {e}")
             return None
 
-    async def _text(self, page: Page, selector: str) -> str:
-        try:
-            el = await page.query_selector(selector)
-            if el:
-                return (await el.inner_text()).strip()
-        except Exception:
-            pass
-        return ""
+
+async def _text(page: Page, selector: str) -> str:
+    try:
+        el = await page.query_selector(selector)
+        if el:
+            return (await el.inner_text()).strip()
+    except Exception:
+        pass
+    return ""

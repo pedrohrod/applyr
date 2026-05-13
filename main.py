@@ -27,10 +27,8 @@ async def main() -> None:
     profile = load_yaml("config/profile.yaml")
     setup_logging(settings)
 
-    resume_path = Path("resume/resume.pdf")
-    if not resume_path.exists():
-        logger.error("Resume not found at resume/resume.pdf — place your PDF there and try again.")
-        sys.exit(1)
+    from src.config_validator import validate
+    validate(settings)
 
     from src.orchestrator import Orchestrator
     orchestrator = Orchestrator(settings, profile)
